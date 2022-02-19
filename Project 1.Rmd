@@ -1,0 +1,88 @@
+---
+title: "Project 1"
+author: "Colin Kalsbeek"
+date: "2/18/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(car)
+melt = read_csv("Melting Ice.csv")
+ice = pivot_longer(melt, 2:4, names_to = "Method", values_to = "mL")
+ice
+```
+
+# Introduction 
+Salt is used to melt ice and snow on roads and sidewalks every winter. As snow and ice melts, the salt is washed into soil, lakes, and streams. This can contaminate drinking water, reservoirs, and wells. This also harms and can kill wildlife that live in a freshwater ecosystem, from the toxic levels of chloride. Salt can also change how water mixes and can create biological dead zones at the bottoms of lakes. As a solution, some towns are adding beet juice to salt brine to enhance the melting capabilities of salt, as they have plenty of leftover beets to use for it. La Cresent has a strong supply of apples, people could potentially use apple juice to help salt melt ice on roads. We will test the effectiveness of beet juice and apple juice added to salt brine as an alternative to water. 
+
+# Methods 
+## Procedure
+1. Made salt brine by adding salt to water so that some salt did not dissolve.
+2. Made apple juice and beet juice.
+3. Put 50 mL of water into 3 containers.
+4. Placed the containers into the freezer for at least 3 hours.
+5. 10 mL of salt brine to 10 mL of water, apple juice or beet juice were mixed together.
+6. Each mixture was poured on top of one of the ice containers.
+7. Placed all the containers in the refrigerator for exactly 30 minutes.
+8. Quickly poured off the liquid and recorded how much liquid was produced using a graduated cylinder. 
+9. Repeat steps 3-8 15 times.
+
+### Statistical Methods
+The researchers used a block design, treating each of the fifteen trials as a block. The block design aided in reducing error, because the experiment didn't take place in a controlled environment. The experiment took place in a family fridge. Some potential causes of error could be the fridge being opened during the experiment that could've caused additional melting. Some trials could've been in the freezer for longer than others, starting with more or less solid ice. The pouring of the melted liquid also leaves room for human error. This further proves why a block design is the correct test for this experiment.In order to use an ANOVA we are under the assumption of independence, normality, and equal population variances. Levenne's test and a normality plot revealed close enough equal population variances. Normality plot and violin plot revealed normality and independence. Tukey HSD was used to test the interaction between variables. A 95% confidence level was used to calculate the the following results. 
+
+
+```{r include=FALSE}
+#graphs n levene's for assumptions
+leveneTest(mL~factor(Method), data = ice)
+#(F(14, 2) = 0.1643, P = 0.849) 
+
+ggplot(ice, aes(x = factor(Trial), y = mL, group = factor(Method))) + 
+                geom_point() + geom_line(aes(linetype = Method, color = Method))
+                #not for assumptions. just made this here and pasted it below
+ggplot(aes(y=mL, x=factor(Method)), data = ice)+geom_violin()
+
+ggplot(aes(shape=factor(Method), sample=mL), data = ice)+stat_qq()+stat_qq_line()
+
+
+```
+
+
+```{r include=FALSE}
+#Results
+model = aov(mL~factor(Trial) + factor(Method), data=ice)
+
+summary(model)
+
+TukeyHSD(model)$'factor(Method)'
+
+MSB = 0.927
+MSE = 0.160
+a = 3
+b = 15
+RE = ((b - 1) * MSB + b * (a - 1) * MSE) / ((a * b - 1) * MSE)
+RE
+```
+
+# Results
+
+```{r echo=FALSE}
+ggplot(ice, aes(x = factor(Trial), y = mL, group = factor(Method))) + 
+                geom_point() + geom_line(aes(linetype = Method, color = Method)) + 
+                labs(x = "Trials", y = "mL of Melted Ice")
+```
+There is significant evidence of a difference in means of the different method factors (F(2, 14) = 8.596, P-value < 0.001). Using Tukey HSD we do not have enough evidence to claim that beet juice is significantly better at melting ice than our control group (Tukey HSD, P = 0.00587). Additionally, we do not have enough information to claim that Apple Juice is significantly better at melting ice than Beet Juice (Tukey HSD, P = 0.0115). Finally, we discovered there is a significant evidence to claim that Apple Juice is better at melting ice than water(Tukey HSD, P < 0.001). 
+
+# References
+```{r echo=FALSE}
+citation(package = "tidyverse")
+citation(package = "car")
+citation()
+```
+
